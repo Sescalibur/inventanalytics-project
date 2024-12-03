@@ -1,5 +1,8 @@
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
+import { User } from '../models/User';
+import { Book } from '../models/Book';
+import { BookLoan } from '../models/BookLoan';
 
 config();
 
@@ -10,9 +13,10 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  synchronize: process.env.NODE_ENV === 'development',
+  synchronize: false,
+  dropSchema: false,
   logging: process.env.NODE_ENV === 'development',
-  entities: ['src/models/**/*.ts'],
+  entities: [User, Book, BookLoan],
   migrations: ['src/migrations/**/*.ts'],
   subscribers: ['src/subscribers/**/*.ts'],
 });

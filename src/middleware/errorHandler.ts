@@ -1,36 +1,26 @@
 import { Request, Response, NextFunction } from 'express';
-
-export class AppError extends Error {
-  statusCode: number;
-  status: string;
-  isOperational: boolean;
-
-  constructor(message: string, statusCode: number) {
-    super(message);
-    this.statusCode = statusCode;
-    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
-    this.isOperational = true;
-
-    Error.captureStackTrace(this, this.constructor);
-  }
-}
+import { AppError } from '../utils/errors';
 
 export const errorHandler = (
   err: Error | AppError,
   req: Request,
   res: Response,
   next: NextFunction
-): void | Response => {
+) => {
   if (err instanceof AppError) {
+    // Operasyonel hatalar (beklenen hatalar)
     return res.status(err.statusCode).json({
-      status: err.status,
+      status: 'error',
       message: err.message,
+      code: err.statusCode
     });
   }
 
+  // Beklenmeyen hatalar
   console.error('ERROR 💥', err);
   return res.status(500).json({
     status: 'error',
     message: 'Something went wrong!',
+    code: 500
   });
 };
