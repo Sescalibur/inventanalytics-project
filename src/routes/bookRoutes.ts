@@ -7,6 +7,9 @@ import { cacheMiddleware } from '../middleware/cache';
 const router = Router();
 const bookController = new BookController();
 
+// Kitap arama route'u
+router.get('/search', bookController.searchBooks);
+
 // Cache'li route'lar
 router.get('/', cacheMiddleware('book', 3600), bookController.getAllBooks);
 router.get('/:id', cacheMiddleware('book', 3600), bookController.getBookById);

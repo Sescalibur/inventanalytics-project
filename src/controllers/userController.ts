@@ -116,6 +116,19 @@ export class UserController {
       const bookId = parseInt(req.params.bookId);
       const { score } = req.body;
 
+      // Önce kullanıcı ve kitap var mı kontrol edelim
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      const book = await this.bookRepository.findOne({ where: { id: bookId } });
+
+      if (!user) {
+        throw new NotFoundError('User');
+      }
+
+      if (!book) {
+        throw new NotFoundError('Book');
+      }
+
+      // Aktif ödünç alma kaydı var mı kontrol edelim
       const bookLoan = await this.bookLoanRepository.findOne({
         where: {
           user: { id: userId },
@@ -125,7 +138,9 @@ export class UserController {
       });
 
       if (!bookLoan) {
-        return next(new Error('Active loan not found'));
+        throw new ConflictError(
+          `User ${user.name} has not borrowed the book "${book.title}" or has already returned it`
+        );
       }
 
       bookLoan.returnedAt = new Date();

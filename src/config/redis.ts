@@ -1,11 +1,21 @@
 import Redis from 'ioredis';
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: Number(process.env.REDIS_PORT) || 6379,
-});
+let redis: Redis | null = null;
 
-redis.on('error', (err) => console.error('Redis Client Error', err));
-redis.on('connect', () => console.log('✅ Redis Client Connected'));
+try {
+  redis = new Redis({
+    host: process.env.REDIS_HOST || 'localhost',
+    port: Number(process.env.REDIS_PORT) || 6379,
+  });
+
+  redis.on('error', (err) => {
+    console.warn('Redis connection failed, continuing without cache:', err.message);
+    redis = null;
+  });
+
+  redis.on('connect', () => console.log('✅ Redis Client Connected'));
+} catch (error) {
+  console.warn('Redis initialization failed, continuing without cache');
+}
 
 export default redis; 

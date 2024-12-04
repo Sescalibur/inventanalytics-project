@@ -91,4 +91,40 @@ export class BookController {
       next(error);
     }
   };
+
+  // Kitap arama
+  public searchBooks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { query } = req.query;
+      
+      if (!query) {
+        return this.getAllBooks(req, res, next);
+      }
+
+      const books = await this.bookRepository
+        .createQueryBuilder('book')
+        .where('LOWER(book.title) LIKE LOWER(:title)', { 
+          title: `%${query}%` 
+        })
+        .getMany();
+
+      if (books.length === 0) {
+        res.status(404).json({
+          status: 'error',
+          message: `No books found matching: "${query}"`,
+          code: 404
+        });
+        return;
+      }
+
+      const response = books.map(book => ({
+        id: book.id,
+        name: book.title
+      }));
+
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
 } 
